@@ -39,7 +39,6 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-
         $request->validate([
             'name'          => 'required|string|max:100',
             'slug'          => 'required|string|max:100|unique:categories',
@@ -53,7 +52,6 @@ class CategoryController extends Controller
         $category->slug =           $data['slug'];
         $category->description =    $data['description'];
         $category->save();
-
 
         return redirect()->route('admin.categories.show', ['category' => $category]);
     }
@@ -94,7 +92,6 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        // validare
         $request->validate([
             'name'          => 'required|string|max:100',
             'slug'          => [
@@ -108,12 +105,10 @@ class CategoryController extends Controller
 
         $data = $request->all();
 
-
         $category->name =           $data['name'];
         $category->slug =           $data['slug'];
         $category->description =    $data['description'];
         $category->update();
-
 
         return redirect()->route('admin.categories.show', ['category' => $category]);
     }
@@ -126,7 +121,7 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-
+        $defaultCategory = Category::where('slug', 'uncategorized')->first();
 
         foreach ($category->posts as $post) {
             $post->category_id = $defaultCategory->id;
@@ -135,5 +130,16 @@ class CategoryController extends Controller
         $category->delete();
 
         return redirect()->route('admin.categories.index')->with('success_delete', $category);
+    }
+
+    public function slug(Request $request) {
+
+        $title = $request->query('title');
+
+        $slug = Category::getSlug($title);
+
+        return response()->json([
+            'slug'  => $slug,
+        ]);
     }
 }
